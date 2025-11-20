@@ -15,12 +15,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.13.15
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          usedocker: false
-          justlogin: false
-          branch: main
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          heroku --version
+
+      - name: Add Heroku remote and deploy
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
+          git push heroku HEAD:main --force
