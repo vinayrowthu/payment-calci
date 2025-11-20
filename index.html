@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Calci</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7fcff; margin: 0; }
+    .app-title { text-align: center; margin-top: 15px; font-size: 28px; font-weight: bold; color: #007aff; }
+    .profile { text-align: center; margin-top: 15px; }
+    .avatar {background:#c0fffa;border-radius:40px;width:60px;height:60px;line-height:60px;margin:auto;font-size:24px;display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555;}
+    .name {font-size: 22px; margin: 8px 0 3px 0; font-weight:bold;}
+    .bank {font-size: 16px; color: #555;}
+    .calc { font-size: 50px; text-align: center; margin: 28px 0 10px 0; font-weight: bold; color: #222;}
+    .expression {font-size: 20px; text-align: center; color: #333;}
+    .message {text-align: center; margin: 10px 0;}
+    .secure-btn {
+  display: block;
+  margin: 18px auto 16px auto;
+  padding: 16px 0;                /* Top/bottom padding for height, zero for sides */
+  color: #fff;
+  background: #03A9F4;
+  border: none;
+  border-radius: 14px;
+  font-size: 21px;
+  font-weight: bold;
+  cursor:pointer;
+  width: 220px;                   /* set a fixed but reasonable width */
+  max-width: 80%;                 /* prevents overflow on mobile */
+  text-align: center;
+}
+    .keypad { display: grid; grid-template-columns: repeat(3, 66px); gap: 11px; justify-content: center; margin-top: 23px;}
+    .key { font-size: 28px; padding: 21px 0; background: #e6f4fa; border-radius: 12px; text-align: center; cursor: pointer; user-select:none; font-weight:bold;}
+    .key:active { background: #bde6f6; }
+    input[type="text"] {padding:6px 12px; border-radius:6px; border:1px solid #ddd; font-size:18px; width:180px;}
+  </style>
+</head>
+<body>
+  <div class="app-title">Payment Calci</div>
+  <div class="profile">
+    <div class="avatar">VR</div>
+    <div class="name">Vinay Rowthu</div>
+    <div class="bank">HDFC Bank - 4441</div>
+  </div>
+  <div class="calc" id="amount">₹0</div>
+  <div class="expression" id="expression"></div>
+  <div class="message">
+    <input id="msg" type="text" placeholder="+ Add Message">
+  </div>
+  <button class="secure-btn" onclick="proceed()">Proceed Securely</button>
+  <div class="keypad" id="keypad"></div>
+  <script>
+    let expr = "";
+    document.getElementById('expression').innerText = expr;
+    let calcValue = 0;
+    document.getElementById('amount').innerText = '₹' + calcValue;
+    let keys = ['1','2','3','4','5','6','7','8','9','+','0','←'];
+    let keypad = document.getElementById('keypad');
+    keys.forEach(k => {
+      let btn = document.createElement('div');
+      btn.className = 'key';
+      btn.innerText = k;
+      btn.onclick = function() {
+        if (k === '←') expr = expr.slice(0,-1);
+        else expr += k;
+        document.getElementById('expression').innerText = expr;
+      }
+      keypad.appendChild(btn);
+    });
+    function proceed() {
+      fetch('/api/calculate', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({expression: expr, message: document.getElementById('msg').value})
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.result !== undefined) {
+          document.getElementById('amount').innerText = '₹' + data.result;
+        } else {
+          alert(data.error);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
